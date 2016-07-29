@@ -160,7 +160,7 @@ export default class ActionsRegistry {
     this._executePararell("setup", [this.config]);
   }
 
-  public deploy(config = {}) {
+  public deploy(options = {}) {
     var self = this;
     self._showKadiraLink();
 
@@ -210,7 +210,7 @@ export default class ActionsRegistry {
             callback(null, summaryMap);
           });
         },
-        whenAfterDeployed(buildLocation, config)
+        whenAfterDeployed(buildLocation, options)
       );
     });
   }

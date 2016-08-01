@@ -88,6 +88,9 @@ export class ConfigParser {
       config = cjson.load(configPath);
     } else if (configPath.match(/\.js$/)) {
       config = require(configPath);
+    } else {
+      // fallback to json parsing
+      config = cjson.load(configPath);
     }
     config = this.preprocess(config);
     this.validate(config);

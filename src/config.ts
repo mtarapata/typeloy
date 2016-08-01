@@ -101,6 +101,7 @@ export class ConfigParser {
     config.env = config.env || {};
     config.setup = config.setup || {} as SetupConfig;
 
+    // Convert legacy setup configs to new SetupConfig
     if (typeof config.setupNode === "undefined") {
       config.setupNode = true;
       config.setup.node = config.nodeVersion || true;
@@ -109,6 +110,7 @@ export class ConfigParser {
       config.setupPhantom = true;
       config.setup.phantom = true;
     }
+
     config.meteorBinary = (config.meteorBinary) ? canonicalizePath(config.meteorBinary) : 'meteor';
     if (typeof config.appName === "undefined") {
       config.appName = "meteor";

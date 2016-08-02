@@ -46,6 +46,7 @@ interface SslConfig {
 interface SetupConfig {
   node: boolean|string;
   phantom: boolean;
+  mongo: boolean;
 }
 
 export interface Config {
@@ -54,6 +55,7 @@ export interface Config {
   // legacy setup config
   setupNode: boolean;
   setupPhantom: boolean;
+  setupMongo: boolean;
   nodeVersion?: string;
 
   enableUploadProgressBar: boolean;
@@ -107,19 +109,25 @@ export class ConfigParser {
     return config;
   }
 
+  public static convertLegacyConfig(config:Config) : Config {
+    // Convert legacy setup configs to new SetupConfig
+    if (typeof config.setupNode !== "undefined") {
+      config.setup.node = config.nodeVersion || true;
+    }
+    if (typeof config.setupPhantom !== "undefined") {
+      config.setup.phantom = true;
+    }
+    if (typeof config.setupMongo !== "undefined") {
+      config.setup.mongo = true;
+    }
+    return config;
+  }
+
   public static preprocess(config:Config) : Config {
     config.env = config.env || {};
     config.setup = config.setup || {} as SetupConfig;
 
-    // Convert legacy setup configs to new SetupConfig
-    if (typeof config.setupNode === "undefined") {
-      config.setupNode = true;
-      config.setup.node = config.nodeVersion || true;
-    }
-    if (typeof config.setupPhantom === "undefined") {
-      config.setupPhantom = true;
-      config.setup.phantom = true;
-    }
+    config = this.convertLegacyConfig(config);
 
     config.meteorBinary = (config.meteorBinary) ? canonicalizePath(config.meteorBinary) : 'meteor';
     if (typeof config.appName === "undefined") {

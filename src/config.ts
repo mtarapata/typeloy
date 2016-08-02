@@ -15,7 +15,17 @@ interface SshOptions {
   port?: number;
 }
 
-interface Server {
+
+interface SiteConfig {
+  servers : Array<ServerConfig>;
+}
+
+
+interface SiteTableConfig {
+  [name:string] : SiteConfig;
+}
+
+interface ServerConfig {
   host: string;
   port: number;
   username: string;
@@ -50,7 +60,7 @@ export interface Config {
   appName: string;
   env: Env;
   meteorBinary?: string;
-  servers: Array<Server>;
+  servers: Array<ServerConfig>;
   app: string;
   ssl?: SslConfig;
   deployCheckWaitTime?: number;
@@ -119,9 +129,9 @@ export class ConfigParser {
       config.enableUploadProgressBar = true;
     }
     
-    _.each(config.servers, (server:Server) => {
-      var sshAgentExists = false;
-      var sshAgent:string = process.env.SSH_AUTH_SOCK;
+    _.each(config.servers, (server:ServerConfig) => {
+      let sshAgentExists = false;
+      let sshAgent:string = process.env.SSH_AUTH_SOCK;
       if (sshAgent) {
         sshAgentExists = fs.existsSync(sshAgent);
         server.sshOptions = server.sshOptions || {};
@@ -149,21 +159,8 @@ export class ConfigParser {
   }
 
   public static validate(config:Config) {
-    // validating server config
-    if (typeof config.servers === "undefined") {
-      fatal("Config 'servers' is not defined.");
-    }
-    if (config.servers instanceof Array && config.servers.length == 0) {
-      fatal("Config 'servers' is empty.");
-    }
 
-    _.each(config.servers, (server:Server) => {
-      var sshAgentExists:boolean = false;
-      var sshAgent:string = process.env.SSH_AUTH_SOCK;
-      if (sshAgent) {
-        sshAgentExists = fs.existsSync(sshAgent);
-      }
-
+    function validateServerConfig(server:ServerConfig, sshAgentExists: boolean) : boolean {
       if (!server.host) {
         fatal('Server host does not exist');
       }
@@ -173,10 +170,28 @@ export class ConfigParser {
       if (!server.password && !server.pem && !sshAgentExists) {
         fatal('Server password, pem or a ssh agent does not exist');
       }
-      if (!config.app) {
-        fatal('Path to app does not exist');
+      return true;
+    }
+
+    // validating server config
+    if (typeof config.servers === "undefined") {
+      fatal("Config 'servers' is not defined.");
+    }
+    if (config.servers instanceof Array && config.servers.length == 0) {
+      fatal("Config 'servers' is empty.");
+    }
+
+    _.each(config.servers, (server:ServerConfig) => {
+      var sshAgentExists:boolean = false;
+      var sshAgent:string = process.env.SSH_AUTH_SOCK;
+      if (sshAgent) {
+        sshAgentExists = fs.existsSync(sshAgent);
       }
+      validateServerConfig(server, sshAgentExists);
     });
+    if (!config.app) {
+      fatal('Path to app does not exist');
+    }
     if (config.ssl) {
       if (!fs.existsSync(config.ssl.pem)) {
         fatal('SSL pem file does not exist');

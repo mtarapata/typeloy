@@ -77,14 +77,17 @@ module.exports = {
       }
     }
   ],
-  "setupMongo": false,
-  "setupNode": true,
-  "nodeVersion": "0.10.44",
-  "setupPhantom": false,
+  "setup": {
+    "mongo": false,
+    "phantom": false,
+    "node": "0.10.44",
+  },
+  "deploy": {
+    "checkDelay": 30,
+  },
   "enableUploadProgressBar": true,
   "appName": "shaka",
   "app": "./app",
-  "deployCheckWaitTime": 30,
   "plugins": [
     new SlackNotificationPlugin({
       hookUrl: 'https://hooks.slack.com/services/.../.../...',

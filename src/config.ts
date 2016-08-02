@@ -44,19 +44,25 @@ interface SslConfig {
 
 
 interface SetupConfig {
-  node: boolean|string;
-  phantom: boolean;
-  mongo: boolean;
+  node?: boolean|string;
+  phantom?: boolean;
+  mongo?: boolean;
+}
+
+interface DeployConfig {
+  checkDelay?: number;
 }
 
 export interface Config {
   setup?: SetupConfig;
+  deploy?: DeployConfig;
 
   // legacy setup config
   setupNode: boolean;
   setupPhantom: boolean;
   setupMongo: boolean;
   nodeVersion?: string;
+  // end of legacy setup config
 
   enableUploadProgressBar: boolean;
   appName: string;
@@ -120,12 +126,16 @@ export class ConfigParser {
     if (typeof config.setupMongo !== "undefined") {
       config.setup.mongo = true;
     }
+    if (typeof config.deployCheckWaitTime !== "undefined") {
+      config.deploy.checkDelay = config.deployCheckWaitTime;
+    }
     return config;
   }
 
   public static preprocess(config:Config) : Config {
     config.env = config.env || {};
     config.setup = config.setup || {} as SetupConfig;
+    config.deploy = config.deploy || {} as DeployConfig;
 
     config = this.convertLegacyConfig(config);
 

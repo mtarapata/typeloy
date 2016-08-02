@@ -209,7 +209,7 @@ export default class Actions {
     // so we can simply set them like this
     process.env.BUILD_LOCATION = buildLocation;
 
-    var deployCheckWaitTime = this.config.deployCheckWaitTime;
+    var deployCheckWaitTime = this.config.deployCheckWaitTime || this.config.deploy.checkDelay;
     var appName = this.config.appName;
     var appPath = this.config.app;
     var enableUploadProgressBar = this.config.enableUploadProgressBar;
